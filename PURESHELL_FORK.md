@@ -16,17 +16,22 @@ The `pureshell` branch has these changes on top of `v4.0.0`; nothing else.
 2. **Palette index 15 is `brightWhite`.** It returned `white`, so `ESC[97m` and
    256-color index 15 drew the normal white.
    File: `lib/src/ui/palette_builder.dart`.
-3. **Dev tooling only.** Dropped the abandoned `dart_code_metrics` dev
+3. **SGR 22 clears bold and faint.** Upstream only cleared faint, so a
+   program that ended bold with `ESC[22m` left the text bold (and, with
+   `boldIsBright`, bright). "Normal intensity" now clears both, as standard.
+   File: `lib/src/core/escape/parser.dart`.
+4. **Dev tooling only.** Dropped the abandoned `dart_code_metrics` dev
    dependency and its analyzer plugin entry, which cannot be resolved on current
    Dart SDKs (so `flutter pub get` and the tests could not run). Packages that
    depend on xterm are not affected.
    Files: `pubspec.yaml`, `analysis_options.yaml`.
 
-Tests for 1 and 2: `test/src/ui/bold_bright_test.dart`.
+Tests: `test/src/ui/bold_bright_test.dart` (1, 2, and 3 with `boldIsBright`),
+`test/src/core/escape/sgr_intensity_test.dart` (3).
 
 ## Known upstream behavior, not changed here
 
-- SGR 22 ("normal intensity") only clears faint, not bold (SGR 21 clears bold).
-  Programs that end bold with `ESC[22m` leave the text bold.
+- SGR 21 clears bold here (as upstream), which is what some terminals do. Others
+  read 21 as double underline, so terminals disagree; we left it as it is.
 - Two golden-image tests (`TerminalView.textScaler ...`) differ by 0.06% and
   0.13% of pixels with the fonts on some machines; this is unrelated to colors.

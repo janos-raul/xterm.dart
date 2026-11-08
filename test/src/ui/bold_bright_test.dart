@@ -151,5 +151,15 @@ void main() {
       final p = _painter(t);
       expect(_textColor(p, '\x1b[1;34m\x1b[0m\x1b[34mX'), t.blue);
     });
+
+    test('after ESC[22m the text uses the normal color, not the bright one',
+        () {
+      final t = _theme(boldIsBright: true);
+      final p = _painter(t);
+      expect(_textColor(p, '\x1b[1;34mX'), t.brightBlue);
+      expect(_textColor(p, '\x1b[1;34m\x1b[22mX'), t.blue);
+      // 22 keeps the color, it only ends the intensity.
+      expect(_textColor(p, '\x1b[34m\x1b[1m\x1b[22mX'), t.blue);
+    });
   });
 }
